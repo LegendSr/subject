@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+	<textarea type="text" value='' id='num1' name="">
+	</textarea>
+	<select id='selType'>
+		<option>+</option>
+		<option>-</option>
+		<option>*</option>
+		<option>/</option>
+	</select>
+	<textarea type="text" value='' id='num2' name="">
+	</textarea>
+	<button id='btn'>计算</button>
+	<br/>
+	总数<span id='num3'></span>
+</body>
+<script type="text/javascript">
+	//1.第一个问题,如何完成大数的加减乘数
+	var numTxt1=document.getElementById('num1')
+	var numTxt2=document.getElementById('num2')
+	var selType=document.getElementById('selType')
+	var numTxt3=document.getElementById('num3')
+	var btn=document.getElementById('btn')
+	var i=0;
+	//此处生成有序的大数
+	do{
+		numTxt1.value+='1234567890'
+		numTxt2.value+='0987654321'
+	} while (i++<10);
+	btn.addEventListener('click', function(){
+		//首先把大数化为字符串,因为数值过长就是 Infinity 
+		var num1=String(numTxt1.value)
+		var num2=String(numTxt2.value)
+		var type=selType.value
+		var sum= '';
+		//处理加法
+		//1234567890
+		//0987654321
+		if(type=='+'){
+			//先转换成数组,然后翻转,用数组进行一个个相加
+			var numList=num1.split('').reverse()
+			var numList2=num2.split('').reverse()
+			var len = numList.length;
+			var carry=0;
+			//carry 存储进位数量
+			if(len<numList2.length) len = numList2.length
+			//按多得一组数循环
+			for (var i = 0; i < len; i++) {
+				if(numList[i] && numList2[i]){
+					var tempSum=Number(numList[i]) + Number(numList2[i])
+					//因为加法进位不可能超过10,乘法就不能直接减10,要取第一位
+					sum+= (tempSum>=10?tempSum-10:tempSum) + carry
+					//大于10进位,
+					if(tempSum>=10)
+						carry=1
+					else
+						carry=0
+				}else if(numList[i]){
+					//少的一组如果先完了就直接把多出来的加到末尾
+					sum+=numList[i]+carry
+				}else if(numList2[i]){
+					sum+=numList2[i]+carry
+				}
+			}
+			if(carry!=0)
+				sum+=carry
+		}
+		console.log(sum,num1,num2)
+		numTxt3.innerHTML=(sum.split('').reverse().join(''))
+
+	})
+</script>
+</html>
