@@ -4,7 +4,7 @@
 	<title></title>
 </head>
 <body>
-	<textarea type="text" value='' id='num1' name="">
+	<textarea type="text" id='num1' name="">
 	</textarea>
 	<select id='selType'>
 		<option>+</option>
@@ -12,7 +12,7 @@
 		<option>*</option>
 		<option>/</option>
 	</select>
-	<textarea type="text" value='' id='num2' name="">
+	<textarea type="text" id='num2' name="">
 	</textarea>
 	<button id='btn'>计算</button>
 	<br/>
@@ -26,11 +26,15 @@
 	var numTxt3=document.getElementById('num3')
 	var btn=document.getElementById('btn')
 	var i=0;
+	//此处是为了清除文本框里原本有的空格
+	numTxt1.value=''
+	numTxt2.value=''
+	selType.value='*'
 	//此处生成有序的大数
 	do{
-		numTxt1.value+='1234567890'
-		numTxt2.value+='0987654321'
-	} while (i++<10);
+		numTxt1.value+='12345'
+		numTxt2.value+='09876'
+	} while (++i<0);
 	btn.addEventListener('click', function(){
 		//首先把大数化为字符串,因为数值过长就是 Infinity 
 		var num1=String(numTxt1.value)
@@ -42,36 +46,83 @@
 		//0987654321
 		if(type=='+'){
 			//先转换成数组,然后翻转,用数组进行一个个相加
+			sum = add(num1,num2)
+			numTxt3.innerHTML=(sum)
+		}else if (type=="*") {
+			//先转换成数组,然后翻转,用数组进行一个个相加
 			var numList=num1.split('').reverse()
 			var numList2=num2.split('').reverse()
-			var len = numList.length;
 			var carry=0;
-			//carry 存储进位数量
-			if(len<numList2.length) len = numList2.length
-			//按多得一组数循环
-			for (var i = 0; i < len; i++) {
-				if(numList[i] && numList2[i]){
-					var tempSum=Number(numList[i]) + Number(numList2[i])
-					//因为加法进位不可能超过10,乘法就不能直接减10,要取第一位
-					sum+= (tempSum>=10?tempSum-10:tempSum) + carry
-					//大于10进位,
-					if(tempSum>=10)
-						carry=1
+			var sum="0";
+			//遍历并相乘所有的因数
+			for (var i = 0; i < numList.length; i++) {
+				var factor = numList[i]
+				var sum2=''
+				var zero=''
+				//存储因数位数上的积
+				for (var j = 0; j < numList2.length; j++) {
+					var factor2 = numList2[j]
+					//因数相乘后加上进位
+					var tempSum = factor*factor2+carry
+					var tempSum2 = tempSum
+					if(tempSum>=10){
+						tempSum = Number(tempSum.toString().substr(1,1))
+					}
+					sum2+=tempSum
+					if(tempSum2 >= 10){
+						carry = Number(tempSum2.toString().substr(0,1))
+					}
 					else
-						carry=0
-				}else if(numList[i]){
-					//少的一组如果先完了就直接把多出来的加到末尾
-					sum+=numList[i]+carry
-				}else if(numList2[i]){
-					sum+=numList2[i]+carry
+						carry = 0
 				}
+				if(carry!=0){
+					sum2+=carry
+					carry=0
+				}
+				//算出因数位数的积后加上当前位数
+				for(var m=i;m>0;m--) zero+='0'
+				sum2=sum2.split('').reverse().join('')+zero
+				//最后把因数每位相乘的积相加
+				sum=add(sum,sum2)
 			}
-			if(carry!=0)
-				sum+=carry
+			numTxt3.innerHTML=(sum)
 		}
-		console.log(sum,num1,num2)
-		numTxt3.innerHTML=(sum.split('').reverse().join(''))
-
 	})
+	function add(num1,num2){
+		//省略计算
+		if(num1=='0') return num2
+		if(num2=='0') return num1
+		var sum = '';
+		var numList=num1.split('').reverse()
+		var numList2=num2.split('').reverse()
+		var len = numList.length;
+		var carry=0;
+		//carry 存储进位数量
+		if(len<numList2.length) len = numList2.length
+		//按多得一组数循环
+		for (var i = 0; i < len; i++) {
+			var tempSum=0
+			if(numList[i] && numList2[i]){
+				tempSum=Number(numList[i]) + Number(numList2[i])+ carry
+				sum+= (tempSum>=10?tempSum-10:tempSum)
+			}else if(numList[i]){
+				//少的一组如果先完了就直接把多出来的加到末尾
+				tempSum=Number(numList[i])+carry
+				sum+= (tempSum>=10?tempSum-10:tempSum)
+			}else if(numList2[i]){
+				tempSum=Number(numList2[i])+carry
+				sum+=(tempSum>=10?tempSum-10:tempSum)
+			}
+			//因为加法进位不可能超过10,乘法就不能直接减10,要取第一位
+			//大于10进位
+			if(tempSum>=10)
+				carry=1
+			else
+				carry=0
+		}
+		if(carry!=0)
+			sum+=carry
+		return sum.split('').reverse().join('');
+	}
 </script>
 </html>
