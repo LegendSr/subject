@@ -36,9 +36,13 @@
 		numTxt2.value+='09876'
 	} while (++i<0);
 	btn.addEventListener('click', function(){
-		//首先把大数化为字符串,因为数值过长就是 Infinity 
-		var num1 = String(numTxt1.value).replace(/ |\./g,'')
-		var num2 = String(numTxt2.value).replace(/ |\./g,'')
+		//首先把大数化为字符串,因为数值过长就是 Infinity ,去除杂鱼符号
+		var reg=/^[0]+|^.[0]+|[^\d]+/g
+		var num1 = String(numTxt1.value).replace(reg,'')
+		var num2 = String(numTxt2.value).replace(reg,'')
+		if(numTxt1.value.indexOf('-')>-1) num1='-'+num1
+		if(numTxt2.value.indexOf('-')>-1) num2='-'+num2
+		console.log(num1,num2)
 		var type=selType.value
 		var sum= '';
 		//处理加法
@@ -89,23 +93,36 @@
 		}else if (type=="-") {
 			sum = reduce(num1,num2)
 			numTxt3.innerHTML=(sum)
+		}else if (type=="/"){
+
 		}
 	})
 	function compare(num1,num2){
 		if(num1.length!=num2.length)
 			return num1.length>num2.length
 		for (var i =  0; i<num1.length; i++) {
-			if(num1[i]!==num2[i])
+			if(num1[i]!==num2[i]){
 				return num1[i]>num2[i]
+			}
 		}
 	}
 	function reduce(num1,num2){
 		if(num1=='0') return num2
 		if(num2=='0') return num1
+		console.log(num1,num2)
 		var sum = '';
 		var numList=num1.split('').reverse()
 		var numList2=num2.split('').reverse()
+		var negative=0;
+		var isCompare='';
+		if(num1[0]=='-')
+			negative++
+		if(num2[0]=='-')
+			negative++
+		if(negative==1)
+			return add(num1.replace(/-/g,''), num2.replace(/-/g,''))
 		if(compare(num2,num1)){
+			isCompare='-'
 			var numList=num2.split('').reverse()
 			var numList2=num1.split('').reverse()
 		}
@@ -131,17 +148,30 @@
 			else
 				carry=0
 		}
-		return sum.split('').reverse().join('');
+
+		return isCompare+sum.split('').reverse().join('');
 	}
 	function add(num1,num2){
 		//省略计算
-		if(num1=='0') return num2
-		if(num2=='0') return num1
+		if(num1=='0' || !num1) return num2
+		if(num2=='0' || !num2) return num1
 		var sum = '';
+		//把数字整个反过来,然后从个位数相加
 		var numList=num1.split('').reverse()
 		var numList2=num2.split('').reverse()
 		var len = numList.length;
 		var carry=0;
+		var negative=0;
+		if(num1[0]=='-')
+			negative++
+		if(num2[0]=='-')
+			negative++
+		//如果只有一位数是减,就列入减法
+		if(negative==1 && num1[0]=='-')
+			return reduce(num2.replace(/-/g,''),num1.replace(/-/g,''))
+		else if(negative==1 && num2[0]=='-'){
+			return reduce(num1.replace(/-/g,''),num2.replace(/-/g,''))
+		}
 		//carry 存储进位数量
 		if(len<numList2.length) len = numList2.length
 		//按多得一组数循环
@@ -168,7 +198,13 @@
 		}
 		if(carry!=0)
 			sum+=carry
-		return sum.split('').reverse().join('');
+		return String(negative==2?'-':'') + sum.split('').reverse().join('');
 	}
+
+
+
+
+
+
 </script>
 </html>
