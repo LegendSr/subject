@@ -1,210 +1,246 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-	<title></title>
+    <title></title>
 </head>
+
 <body>
-	<textarea type="text" id='num1' name="">
-	</textarea>
-	<select id='selType'>
-		<option>+</option>
-		<option>-</option>
-		<option>*</option>
-		<option>/</option>
-	</select>
-	<textarea type="text" id='num2' name="">
-	</textarea>
-	<button id='btn'>计算</button>
-	<br/>
-	总数<span id='num3'></span>
+    <textarea type="text" id='num1' name="">
+    </textarea>
+    <select id='selType'>
+        <option>+</option>
+        <option>-</option>
+        <option>*</option>
+        <option>/</option>
+    </select>
+    <textarea type="text" id='num2' name="">
+    </textarea>
+    <button id='btn'>计算</button>
+    <br />
+    结果:<span id='num3'></span>
 </body>
 <script type="text/javascript">
-	//1.第一个问题,如何完成大数的加减乘数
-	var numTxt1=document.getElementById('num1')
-	var numTxt2=document.getElementById('num2')
-	var selType=document.getElementById('selType')
-	var numTxt3=document.getElementById('num3')
-	var btn=document.getElementById('btn')
-	var i=0;
-	//此处是为了清除文本框里原本有的空格
-	numTxt1.value=''
-	numTxt2.value=''
-	selType.value='-'
-	//此处生成有序的大数
-	do{
-		numTxt1.value+='12345'
-		numTxt2.value+='09876'
-	} while (++i<0);
-	btn.addEventListener('click', function(){
-		//首先把大数化为字符串,因为数值过长就是 Infinity ,去除杂鱼符号
-		var reg=/^[0]+|^.[0]+|[^\d]+/g
-		var num1 = String(numTxt1.value).replace(reg,'')
-		var num2 = String(numTxt2.value).replace(reg,'')
-		if(numTxt1.value.indexOf('-')>-1) num1='-'+num1
-		if(numTxt2.value.indexOf('-')>-1) num2='-'+num2
-		console.log(num1,num2)
-		var type=selType.value
-		var sum= '';
-		//处理加法
-		//1234567890
-		//0987654321
-		if(type=='+'){
-			//先转换成数组,然后翻转,用数组进行一个个相加
-			sum = add(num1,num2)
-			numTxt3.innerHTML=(sum)
-		}else if (type=="*") {
-			//先转换成数组,然后翻转,用数组进行一个个相加
-			var numList=num1.split('').reverse()
-			var numList2=num2.split('').reverse()
-			var carry=0;
-			var sum="0";
-			//遍历并相乘所有的因数
-			for (var i = 0; i < numList.length; i++) {
-				var factor = numList[i]
-				var sum2=''
-				var zero=''
-				//存储因数位数上的积
-				for (var j = 0; j < numList2.length; j++) {
-					var factor2 = numList2[j]
-					//因数相乘后加上进位
-					var tempSum = factor*factor2+carry
-					var tempSum2 = tempSum
-					if(tempSum>=10){
-						tempSum = Number(tempSum.toString().substr(1,1))
-					}
-					sum2+=tempSum
-					if(tempSum2 >= 10){
-						carry = Number(tempSum2.toString().substr(0,1))
-					}
-					else
-						carry = 0
-				}
-				if(carry!=0){
-					sum2+=carry
-					carry=0
-				}
-				//算出因数位数的积后加上当前位数
-				for(var m=i;m>0;m--) zero+='0'
-				sum2=sum2.split('').reverse().join('')+zero
-				//最后把因数每位相乘的积相加
-				sum=add(sum,sum2)
-			}
-			numTxt3.innerHTML=(sum)
-		}else if (type=="-") {
-			sum = reduce(num1,num2)
-			numTxt3.innerHTML=(sum)
-		}else if (type=="/"){
+//1.第一个问题,如何完成大数的加减乘数
+(function() {
+    var numTxt1 = document.getElementById('num1')
+    var numTxt2 = document.getElementById('num2')
+    var selType = document.getElementById('selType')
+    var numTxt3 = document.getElementById('num3')
+    var btn = document.getElementById('btn')
+    var decimal = 5;
+    //取多少位小数,除法专用
+    var i = 0;
+    //此处是为了清除文本框里原本有的空格
+    numTxt1.value = ''
+    numTxt2.value = ''
+    selType.value = '-'
+    //此处生成有序的大数
+    do {
+        numTxt1.value += '-123'
+        numTxt2.value += '-1234'
+    } while (++i < 0);
+    btn.addEventListener('click', function() {
+        //首先把大数化为字符串,因为数值过长就是 Infinity ,去除杂鱼符号
+        var reg = /^[0]+|^.[0]+|[^\d]+/g
+        var num1 = String(numTxt1.value).replace(reg, '')
+        var num2 = String(numTxt2.value).replace(reg, '')
+        if (numTxt1.value.indexOf('-') > -1) num1 = '-' + num1
+        if (numTxt2.value.indexOf('-') > -1) num2 = '-' + num2
+        var type = selType.value
+        var sum = '';
+        //处理加法
+        //1234567890
+        //0987654321
+        if (type == '+') {
+            //先转换成数组,然后翻转,用数组进行一个个相加
+            sum = add(num1, num2)
+            numTxt3.innerHTML = sum
+        } else if (type == "*") {
+            //先转换成数组,然后翻转,用数组进行一个个相加
+            var numList = num1.split('').reverse()
+            var numList2 = num2.split('').reverse()
+            var carry = 0;
+            var sum = "0";
+            //遍历并相乘所有的因数
+            for (var i = 0; i < numList.length; i++) {
+                var factor = numList[i]
+                var sum2 = ''
+                var zero = ''
+                //存储因数位数上的积
+                for (var j = 0; j < numList2.length; j++) {
+                    var factor2 = numList2[j]
+                    //因数相乘后加上进位
+                    var tempSum = factor * factor2 + carry
+                    var tempSum2 = tempSum
+                    if (tempSum >= 10) {
+                        tempSum = Number(tempSum.toString().substr(1, 1))
+                    }
+                    sum2 += tempSum
+                    if (tempSum2 >= 10) {
+                        carry = Number(tempSum2.toString().substr(0, 1))
+                    } else
+                        carry = 0
+                }
+                if (carry != 0) {
+                    sum2 += carry
+                    carry = 0
+                }
+                //算出因数位数的积后加上当前位数
+                for (var m = i; m > 0; m--) zero += '0'
+                sum2 = sum2.split('').reverse().join('') + zero
+                //最后把因数每位相乘的积相加
+                sum = add(sum, sum2)
+            }
+            numTxt3.innerHTML = sum
+        } else if (type == "-") {
+            sum = reduce(num1, num2)
+            numTxt3.innerHTML = sum
+        } else if (type == "/") {
+            var carry = 0;
+            var carryObj = reduceLen(num1, num2)
+            sum = carryObj.carry + '.';
+            for (var i = decimal - 1; i >= 0; i--) {
+                var tempSum = carryObj.sum?carryObj.sum+'0':'0'
+                carryObj = reduceLen(tempSum, num2)
+                sum += carryObj.carry
+            }
+            numTxt3.innerHTML = sum
+        }
+    })
 
-		}
-	})
-	function compare(num1,num2){
-		if(num1.length!=num2.length)
-			return num1.length>num2.length
-		for (var i =  0; i<num1.length; i++) {
-			if(num1[i]!==num2[i]){
-				return num1[i]>num2[i]
-			}
-		}
-	}
-	function reduce(num1,num2){
-		if(num1=='0') return num2
-		if(num2=='0') return num1
-		console.log(num1,num2)
-		var sum = '';
-		var numList=num1.split('').reverse()
-		var numList2=num2.split('').reverse()
-		var negative=0;
-		var isCompare='';
-		if(num1[0]=='-')
-			negative++
-		if(num2[0]=='-')
-			negative++
-		if(negative==1)
-			return add(num1.replace(/-/g,''), num2.replace(/-/g,''))
-		if(compare(num2,num1)){
-			isCompare='-'
-			var numList=num2.split('').reverse()
-			var numList2=num1.split('').reverse()
-		}
-		var len = numList.length;
-		var carry=0;
-		//carry 存储进位数量
-		if(len<numList2.length) len = numList2.length
-		//按多得一组数循环
-		for (var i = 0; i < len; i++) {
-			var tempSum=0
-			if(numList[i] && numList2[i]){
-				tempSum = Number(numList[i]) - Number(numList2[i])+ carry
-			}else if(numList[i]){
-				tempSum = Number(numList[i]) - carry
-			}else if(numList2[i]){
-				tempSum = Number(numList2[i]) - carry
-			}
-			sum+= (tempSum<0?tempSum+10:tempSum)
-			//因为加法进位不可能超过10,乘法就不能直接减10,要取第一位
-			//大于10进位
-			if(tempSum<0)
-				carry=1
-			else
-				carry=0
-		}
+    //拿到被除数num1与除数num2
+    function reduceLen(num1, num2) {
+        var tempNum = num1
+        var carry = 0
+        //当除数两边不为空,累计被除数能被除数减掉的次数
+        if(num1!=0 && num2!=0){
+            do {
+                tempNum = reduce(num1, num2).replace(/^0+/g, '')
+                if (tempNum != '0' && tempNum[0] != '-') {
+                    carry++;
+                    num1 = tempNum
+                }
+            } while (tempNum != '0' && tempNum[0] != '-');
+        }
+        //返回商与余数
+        return { carry: carry, sum: num1 }
+    }
 
-		return isCompare+sum.split('').reverse().join('');
-	}
-	function add(num1,num2){
-		//省略计算
-		if(num1=='0' || !num1) return num2
-		if(num2=='0' || !num2) return num1
-		var sum = '';
-		//把数字整个反过来,然后从个位数相加
-		var numList=num1.split('').reverse()
-		var numList2=num2.split('').reverse()
-		var len = numList.length;
-		var carry=0;
-		var negative=0;
-		if(num1[0]=='-')
-			negative++
-		if(num2[0]=='-')
-			negative++
-		//如果只有一位数是减,就列入减法
-		if(negative==1 && num1[0]=='-')
-			return reduce(num2.replace(/-/g,''),num1.replace(/-/g,''))
-		else if(negative==1 && num2[0]=='-'){
-			return reduce(num1.replace(/-/g,''),num2.replace(/-/g,''))
-		}
-		//carry 存储进位数量
-		if(len<numList2.length) len = numList2.length
-		//按多得一组数循环
-		for (var i = 0; i < len; i++) {
-			var tempSum=0
-			if(numList[i] && numList2[i]){
-				tempSum=Number(numList[i]) + Number(numList2[i])+ carry
-				
-			}else if(numList[i]){
-				//少的一组如果先完了就直接把多出来的加到末尾
-				tempSum=Number(numList[i])+carry
-				// sum+= (tempSum>=10?tempSum-10:tempSum)
-			}else if(numList2[i]){
-				tempSum=Number(numList2[i])+carry
-				// sum+=(tempSum>=10?tempSum-10:tempSum)
-			}
-			sum+= (tempSum>=10?tempSum-10:tempSum)
-			//因为加法进位不可能超过10,乘法就不能直接减10,要取第一位
-			//大于10进位
-			if(tempSum>=10)
-				carry=1
-			else
-				carry=0
-		}
-		if(carry!=0)
-			sum+=carry
-		return String(negative==2?'-':'') + sum.split('').reverse().join('');
-	}
+    //比较两个正数的大小
+    function compare(num1, num2) {
+        if (num1.length != num2.length)
+            return num1.length > num2.length
+        for (var i = 0; i < num1.length; i++) {
+            if (num1[i] !== num2[i]) {
+                return num1[i] > num2[i]
+            }
+        }
+    }
 
+    function reduce(num1, num2) {
+        if (num1 == '0') return num2
+        if (num2 == '0') return num1
+        var sum = '';
+        var numList = num1.split('').reverse()
+        var numList2 = num2.split('').reverse()
+        var negative = 0;
+        var isCompare = '';
+        if (num1[0] == '-')
+            negative++
+        if (num2[0] == '-')
+            negative++
+        //累计负号,如果只有一个负号且是第二个数,就去掉负号做加法,第一个数为负就加上负号
+        if (negative == 1 && num2[0]=='-')
+            return add(num1.replace(/-/g, ''), num2.replace(/-/g, ''))
+        else if(negative == 1)
+            return '-' + add(num1.replace(/-/g, ''), num2.replace(/-/g, ''))
+        if (compare(num2, num1)) {
+            //如果发现num1小于num2,那就加上负号
+            if(negative!=2)
+            isCompare = '-'
+            var numList = num2.split('').reverse()
+            var numList2 = num1.split('').reverse()
+        }
+        //去掉负号
+        if(negative == 2){
+            numList.pop()
+            numList2.pop()
+        }
+        var len = numList.length;
+        var carry = 0;
+        var tempSum = 0
+        //carry 存储进位数量
+        if (len < numList2.length) len = numList2.length
+        for (var i = 0; i < len; i++) {
+            if (numList[i] && numList2[i]) {
+                tempSum = Number(numList[i]) - Number(numList2[i]) - carry
+            } else if(numList[i]){
+                tempSum = Number(numList[i]) - carry
+            }else if(numList2[i]){
+                tempSum = Number(numList2[i])-carry
+            }
+            sum += (tempSum < 0 ? tempSum + 10 : tempSum)
+            //因为减法进位不可能超过10,所以小于零即为1
+            if (tempSum < 0)
+                carry = 1
+            else
+                carry = 0
+        }
+        return isCompare + sum.split('').reverse().join('');
+    }
 
-
-
-
-
+    function add(num1, num2) {
+        //省略计算
+        if (num1 == '0' || !num1) return num2
+        if (num2 == '0' || !num2) return num1
+        var sum = '';
+        //把数字整个反过来,然后从个位数相加
+        var numList = num1.split('').reverse()
+        var numList2 = num2.split('').reverse()
+        var len = numList.length;
+        var carry = 0;
+        var negative = 0;
+        if (num1[0] == '-')
+            negative++
+        if (num2[0] == '-')
+            negative++
+        //如果只有一位数是负,就列入减法
+        if (negative == 1 && num1[0] == '-')
+            return reduce(num2.replace(/-/g, ''), num1.replace(/-/g, ''))
+        else if (negative == 1 && num2[0] == '-') {
+            return reduce(num1.replace(/-/g, ''), num2.replace(/-/g, ''))
+        }
+        //去掉负号
+        if(negative == 2){
+            numList.pop()
+            numList2.pop()
+        }
+        //carry 存储进位数量
+        if (len < numList2.length) len = numList2.length
+        //按多得一组数循环
+        var tempSum = 0
+        for (var i = 0; i < len; i++) {
+            if (numList[i] && numList2[i]) {
+                tempSum = Number(numList[i]) + Number(numList2[i]) + carry
+            }else if(numList[i]){
+                tempSum = Number(numList[i]) + carry
+            }else if(numList2[i]){
+                tempSum = Number(numList2[i])+carry
+            }
+            sum += (tempSum >= 10 ? tempSum - 10 : tempSum)
+            //因为加法进位不可能超过10,乘法就不能直接减10,要取第一位
+            if (tempSum >= 10)
+                carry = 1
+            else
+                carry = 0
+        }
+        if (carry != 0)
+            sum += carry
+        //如果有两位负号,就加上负号
+        return String(negative == 2 ? '-' : '') + sum.split('').reverse().join('');
+    }
+})()
 </script>
+
 </html>
