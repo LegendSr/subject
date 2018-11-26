@@ -34,11 +34,11 @@
     //此处是为了清除文本框里原本有的空格
     numTxt1.value = ''
     numTxt2.value = ''
-    selType.value = '-'
+    selType.value = '+'
     //此处生成有序的大数
     do {
-        numTxt1.value += '-123'
-        numTxt2.value += '-1234'
+        numTxt1.value += '1234567890'
+        numTxt2.value += '0987654321'
     } while (++i < 0);
     btn.addEventListener('click', function() {
         //首先把大数化为字符串,因为数值过长就是 Infinity ,去除杂鱼符号
@@ -49,6 +49,11 @@
         if (numTxt2.value.indexOf('-') > -1) num2 = '-' + num2
         var type = selType.value
         var sum = '';
+        var negative = 0;
+        if (num1[0] == '-')
+            negative++
+        if (num2[0] == '-')
+            negative++
         //处理加法
         //1234567890
         //0987654321
@@ -57,6 +62,9 @@
             sum = add(num1, num2)
             numTxt3.innerHTML = sum
         } else if (type == "*") {
+            //去掉负号
+            num1=num1.replace(/-/g,'')
+            num2=num2.replace(/-/g,'')
             //先转换成数组,然后翻转,用数组进行一个个相加
             var numList = num1.split('').reverse()
             var numList2 = num2.split('').reverse()
@@ -92,11 +100,13 @@
                 //最后把因数每位相乘的积相加
                 sum = add(sum, sum2)
             }
-            numTxt3.innerHTML = sum
+            numTxt3.innerHTML = negative==1?'-'+sum:sum
         } else if (type == "-") {
             sum = reduce(num1, num2)
             numTxt3.innerHTML = sum
         } else if (type == "/") {
+            num1=num1.replace(/-/g,'')
+            num2=num2.replace(/-/g,'')
             var carry = 0;
             var carryObj = reduceLen(num1, num2)
             sum = carryObj.carry + '.';
@@ -105,7 +115,7 @@
                 carryObj = reduceLen(tempSum, num2)
                 sum += carryObj.carry
             }
-            numTxt3.innerHTML = sum
+            numTxt3.innerHTML = negative==1?'-'+sum:sum
         }
     })
 
