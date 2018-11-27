@@ -1,0 +1,24 @@
+{
+  "name": "subject",
+  "version": "1.0.0",
+  "description": "> 项目主要存了一些思考题目",
+  "main": "gulpfile.js",
+  "dependencies": {
+    "browser-sync": "^2.26.3",
+    "gulp": "^3.9.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/1545320338/subject.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/1545320338/subject/issues"
+  },
+  "homepage": "https://github.com/1545320338/subject#readme"
+}
